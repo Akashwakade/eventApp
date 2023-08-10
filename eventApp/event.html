@@ -1,0 +1,121 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+    
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> event Dashboard</title>
+    </head>
+<style>
+   body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color:chocolate;
+  }
+    #event-cards{
+        border: 2px solid red;
+        width: 80%;
+        margin: 20px auto;
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 10px;
+        background-color: aquamarine;
+    }
+    .event-card{
+        display: block;
+        border: 2px solid black;
+        justify-content: space-between;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px, rgb(51, 51, 51) 0px 0px 0px 3px;
+    }
+</style>
+<body>
+  <div class="events-container">
+    <h2>Events</h2>
+    <div class="filter-sort-container">
+      <label for="category-filter">Filter by Category:</label>
+      <select id="category-filter">
+        <option value="">All</option>
+        <option value="Music">Music</option>
+        <option value="Sports">Sports</option>
+        <option value="Workshop">Workshop</option>
+      </select>
+
+      <label for="price-sort">Sort by Price:</label>
+      <select id="price-sort">
+        <option value="ascending">Ascending</option>
+        <option value="descending">Descending</option>
+      </select>
+    </div>
+    <div class="event-cards" id="event-cards">
+      <!-- Event cards will be added dynamically -->
+    </div>
+  </div>
+  <script>
+
+    // script.js
+
+// ... (existing code)
+
+// Function to fetch and render events as cards
+async function fetchAndRenderEvents() {
+  try {
+    const response = await fetch("https://shy-pear-seagull-gear.cyclic.app/events");
+    const events = await response.json();
+
+    const eventCardsContainer = document.getElementById("event-cards");
+    eventCardsContainer.innerHTML = ""; // Clear existing cards
+
+    const categoryFilter = document.getElementById("category-filter").value;
+    const sortedEvents = sortEvents(events, categoryFilter);
+
+    sortedEvents.forEach(event => {
+      const card = document.createElement("div");
+      card.classList.add("event-card");
+      card.innerHTML = `
+        <img src="${event.posterUrl}" alt="${event.name}">
+        <h3>${event.name}</h3>
+        <p>Date: ${event.date}</p>
+        <p>Location: ${event.location}</p>
+        <p>Category: ${event.category}</p>
+        <p>Price: ${event.price}</p>
+      `;
+      eventCardsContainer.appendChild(card);
+    });
+  } catch (error) {
+    console.error("Error fetching events:", error);
+  }
+}
+
+// Function to sort events based on price
+function sortEvents(events, category) {
+  const priceSort = document.getElementById("price-sort").value;
+
+  // Apply category filter
+  const filteredEvents = category ? events.filter(event => event.category === category) : events;
+
+  // Apply price sort
+  if (priceSort === "ascending") {
+    return filteredEvents.sort((a, b) => a.price - b.price);
+  } else if (priceSort === "descending") {
+    return filteredEvents.sort((a, b) => b.price - a.price);
+  } else {
+    return filteredEvents;
+  }
+}
+
+// Event listener for category filter and price sort
+const categoryFilter = document.getElementById("category-filter");
+const priceSort = document.getElementById("price-sort");
+categoryFilter.addEventListener("change", fetchAndRenderEvents);
+priceSort.addEventListener("change", fetchAndRenderEvents);
+
+// Fetch and render events when the page loads
+fetchAndRenderEvents();
+
+  </script>
+</body>
+</html>
